@@ -29,9 +29,17 @@ const banco = new Pool({
 banco.connect()
     .then(() => console.log("Banco de dados conectado!"))
     .catch(err => console.error("Erro ao conectar ao banco:", err));
-    
+
+let conversationHistory = [];  
 async function configChat(message) {
-    return groq.chat.completions.create({
+    // Adiciona a nova mensagem do usuário ao histórico
+    conversationHistory.push({
+        role: "user",
+        content: message
+    });
+
+    // Passa o histórico completo de mensagens para a IA, incluindo a última mensagem do usuário
+    const respostaGroq = await groq.chat.completions.create({
         messages: [
             {
                 role: "system",
@@ -43,16 +51,21 @@ async function configChat(message) {
                 Você não deve responder perguntas sobre diferentes temas. Seu único trabalho é ser assistente psicológica da MindTrack.\
                 Caso receba outras perguntas, deve redirecionar para o tema de assistente novamente de forma educada e direta.\
                 Se perguntarem se você pode machucar ou matar o usuário, diga não de forma criativa e confortante.\
-                caso o relato ou pedido de ajuda for grave, indique auxilio clinico"
+                caso o relato ou pedido de ajuda for grave, indique auxilio clinico",
             },
-            {
-                role: "user",
-                content: message
-            }
-        ],
+            ...conversationHistory  // Inclui o histórico de mensagens anteriores
+    ],
         model: "llama-3.3-70b-versatile",
         temperature: 0.2
     });
+
+    // Adiciona a resposta da IA ao histórico
+    conversationHistory.push({
+        role: "assistant",
+        content: respostaGroq.choices[0]?.message?.content
+    });
+
+    return respostaGroq.choices[0]?.message?.content;
 }
 
 app.get('/register', (req, res) => res.sendFile(`${__dirname}/registro.html`));
@@ -118,7 +131,7 @@ app.post("/api/chat", async (req, res) => {
 
     try {
         const respostaGroq = await configChat(message);
-        return res.json({ response: respostaGroq.choices[0]?.message?.content });
+        return res.json({ response: respostaGroq });
     } catch (error) {
         return res.status(500).send({ error: "Erro ao consultar a API da Groq." });
     }
