@@ -6,8 +6,8 @@ async function sendMessage() {
 
     // Cria a mensagem do usuário
     const userMessage = document.createElement("div");
-    userMessage.textContent = input.value; // Removi "Você: " para manter o layout limpo
-    userMessage.classList.add("message", "user"); // Adiciona as classes
+    userMessage.textContent = input.value;
+    userMessage.classList.add("message", "user");
     messagesDiv.appendChild(userMessage);
 
     try {
@@ -22,18 +22,17 @@ async function sendMessage() {
         }
 
         const data = await response.json();
-        console.log("Resposta recebida:", data); // 🔹 Log para debug
+        console.log("Resposta recebida:", data);
 
-        // Cria a mensagem do bot
         const botMessage = document.createElement("div");
-        botMessage.textContent = data.response || "Erro ao obter resposta"; // Removi "Maria: " para manter o layout limpo
-        botMessage.classList.add("message", "bot"); // Adiciona as classes
+        botMessage.textContent = data.response || "Erro ao obter resposta"; 
+        botMessage.classList.add("message", "bot");
         messagesDiv.appendChild(botMessage);
     } catch (error) {
         console.error("Erro ao enviar mensagem:", error);
         const errorMessage = document.createElement("div");
         errorMessage.textContent = "Erro: Não foi possível obter resposta.";
-        errorMessage.classList.add("message", "bot"); // Adiciona as classes
+        errorMessage.classList.add("message", "bot"); 
         messagesDiv.appendChild(errorMessage);
     }
 

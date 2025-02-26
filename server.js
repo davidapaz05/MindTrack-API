@@ -30,15 +30,12 @@ banco.connect()
     .then(() => console.log("Banco de dados conectado!"))
     .catch(err => console.error("Erro ao conectar ao banco:", err));
 
-let conversationHistory = [];  
+let contexto = [];  
 async function configChat(message) {
-    // Adiciona a nova mensagem do usuário ao histórico
-    conversationHistory.push({
+    contexto.push({
         role: "user",
         content: message
     });
-
-    // Passa o histórico completo de mensagens para a IA, incluindo a última mensagem do usuário
     const respostaGroq = await groq.chat.completions.create({
         messages: [
             {
@@ -53,14 +50,13 @@ async function configChat(message) {
                 Se perguntarem se você pode machucar ou matar o usuário, diga não de forma criativa e confortante.\
                 caso o relato ou pedido de ajuda for grave, indique auxilio clinico",
             },
-            ...conversationHistory  // Inclui o histórico de mensagens anteriores
+            ...contexto  
     ],
         model: "llama-3.3-70b-versatile",
         temperature: 0.2
     });
-
-    // Adiciona a resposta da IA ao histórico
-    conversationHistory.push({
+    
+    contexto.push({
         role: "assistant",
         content: respostaGroq.choices[0]?.message?.content
     });
