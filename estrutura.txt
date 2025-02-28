@@ -1,0 +1,25 @@
+MINDTRACK/
+│── config/
+│   ├── .env
+│   ├── database.js
+│   ├── groqConfig.js
+│── controllers/
+│   ├── authController.js
+│   ├── chatController.js
+│── js/
+│   ├── fetchEnvioMessage.js
+│   ├── login.js
+│   ├── registro.js
+│── node_modules/
+│── pages/
+│   ├── chat.html
+│   ├── login.html
+│   ├── registro.html
+│── routes/
+│   ├── authRoutes.js
+│   ├── chatRoutes.js
+│── style/
+│── .gitignore
+│── package-lock.json
+│── package.json
+│── server.js
