@@ -6,15 +6,9 @@ MINDTRACK/
 │── controllers/
 │   ├── authController.js
 │   ├── chatController.js
-│── js/
-│   ├── fetchEnvioMessage.js
-│   ├── login.js
-│   ├── registro.js
+│── middlewares/
+│   ├── authenticate.js   
 │── node_modules/
-│── pages/
-│   ├── chat.html
-│   ├── login.html
-│   ├── registro.html
 │── routes/
 │   ├── authRoutes.js
 │   ├── chatRoutes.js
