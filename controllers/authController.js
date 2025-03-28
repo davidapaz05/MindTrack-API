@@ -40,7 +40,7 @@ export async function register(req, res) {
                 questionario_inicial: user.questionario_inicial
             },
             token,
-            redirect: ('/pages/questionarioInicial.html')
+            redirect: user.questionario_inicial ? '/index.html' : '/questionarioInicial.html'
         });
 
     } catch (error) {
