@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro</title>
+    <script src="/js/fetchRegistro.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Corpo da página */
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(to right, #ff7e5f, #feb47b); /* Gradiente de fundo */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        /* Container principal */
+        .register-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+        }
+
+        /* Caixa de cadastro */
+        .register-box {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+            width: 300px;
+        }
+
+        /* Título */
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 24px;
+            color: #333;
+        }
+
+        /* Estilização dos campos de texto */
+        .textbox {
+            margin-bottom: 15px;
+        }
+
+        .textbox input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            color: #555;
+            transition: border 0.3s ease;
+        }
+
+        /* Foco nos campos de entrada */
+        .textbox input:focus {
+            border-color: #ff7e5f;
+            outline: none;
+        }
+
+        /* Botão de submit */
+        input[type="submit"] {
+            width: 100%;
+            padding: 12px;
+            background-color: #ff7e5f;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        /* Efeito de hover no botão */
+        input[type="submit"]:hover {
+            background-color: #feb47b;
+        }
+
+        /* Estilização para o campo de data */
+        .textbox input[type="date"] {
+            padding: 10px;
+            border: 2px solid #ccc;
+            border-radius: 5px;
+        }
+
+        /* Responsividade */
+        @media (max-width: 600px) {
+            .register-box {
+                width: 100%;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <div class="register-box">
+            <h2>Cadastro</h2>
+            <form action="#">
+                <div class="textbox">
+                    <input type="text" placeholder="Nome Completo" name="nome" required>
+                </div>
+                <div class="textbox">
+                    <input type="email" placeholder="Email" name="email" required>
+                </div>
+                <div class="textbox">
+                    <input type="password" placeholder="Senha" name="senha" required>
+                </div>
+                <div class="textbox">
+                    <input type="password" placeholder="Confirmar Senha" name="confirmar-senha" required>
+                </div>
+                <div class="textbox">
+                    <input type="date" name="data-nascimento" required>
+                </div>
+                <input type="submit" value="Cadastrar">
+            </form>
+        </div>
+    </div>
+</body>
+</html>

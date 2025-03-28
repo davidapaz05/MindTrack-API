@@ -31,3 +31,5 @@ Thumbs.db
 # Build e dependências do Node
 dist/
 build/
+
+js/

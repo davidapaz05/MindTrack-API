@@ -19,3 +19,5 @@ export function authenticate(req, res, next) {
         next(); // Passar o controle para a próxima função
     });
 }
+
+export default authenticate;

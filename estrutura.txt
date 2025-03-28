@@ -6,12 +6,21 @@ MINDTRACK/
 │── controllers/
 │   ├── authController.js
 │   ├── chatController.js
+|
+|──js/
+|   fetchLogin.js
+|   fetchRegistro.js   
+|
 │── middlewares/
-│   ├── authenticate.js   
+│   ├── authenticate.js 
+|
+|  
 │── node_modules/
 │── routes/
 │   ├── authRoutes.js
 │   ├── chatRoutes.js
+|
+|
 │── style/
 │── .gitignore
 │── package-lock.json

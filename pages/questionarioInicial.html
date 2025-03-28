@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Questionário Inicial | MindTrack</title>
+    <link rel="stylesheet" href="/styles/questionarioInicial.css">
+    <style>
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .pergunta {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 8px;
+        }
+        .alternativas {
+            margin-top: 15px;
+        }
+        .alternativa {
+            margin: 10px 0;
+        }
+        .btn-submit {
+            padding: 10px 20px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Questionário Inicial</h1>
+            <p>Por favor, responda às perguntas abaixo para personalizarmos sua experiência.</p>
+        </header>
+
+        <main>
+            <form id="questionario-form">
+                <div id="questionario-container">
+                    <!-- Perguntas carregadas dinamicamente -->
+                    <div id="loading">Carregando perguntas...</div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-submit">Enviar Respostas</button>
+                </div>
+            </form>
+        </main>
+    </div>
+
+    <script src="/js/fetchQuestionario.js"></script>
+</body>
+</html>
