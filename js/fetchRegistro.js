@@ -51,9 +51,17 @@ document.addEventListener("DOMContentLoaded", function () {
             const data = await response.json();
             
             if (response.ok) {
+                // Armazena os dados
                 sessionStorage.setItem("token", data.token);
                 sessionStorage.setItem("user", JSON.stringify(data.user));
-                window.location.href = "questionarioInicial.html";
+                
+                // Força a escrita no sessionStorage antes de redirecionar
+                sessionStorage.setItem('__redirectCheck', 'true');
+                
+                // Redireciona após garantir o armazenamento
+                setTimeout(() => {
+                    window.location.href = "questionarioInicial.html";
+                }, 50);
             } else {
                 alert(`Erro: ${data.message}`);
             }

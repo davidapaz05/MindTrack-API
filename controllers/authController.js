@@ -8,7 +8,7 @@ export async function register(req, res) {
     const { nome, email, senha, confirmarSenha, data_nascimento } = req.body;
 
     if (senha !== confirmarSenha) {
-        return res.status(400).json({ success: false, message: 'os senhas não coincidem' });
+        return res.status(400).json({ success: false, message: 'as senhas não coincidem' });
     }
 
     try {
