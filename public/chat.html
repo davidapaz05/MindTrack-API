@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot MindTrack</title>
+    <link rel="stylesheet" href="/styles/chat.css">
+    <script src="/js/fetchChat.js"></script>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-box" id="chat-box">
+            <div class="chat-message assistant">
+                <p>Olá! Como posso ajudá-lo hoje?</p>
+            </div>
+        </div>
+        <div class="input-container">
+            <input type="text" id="user-message" placeholder="Escreva sua mensagem..." onkeydown="if(event.key === 'Enter') sendMessage()" />
+            <button onclick=sendMessage() >Enviar</button>
+        </div>
+    </div>
+</body>
+</html>

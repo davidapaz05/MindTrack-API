@@ -40,7 +40,6 @@ export async function register(req, res) {
                 questionario_inicial: user.questionario_inicial
             },
             token,
-            redirect: user.questionario_inicial ? '/index.html' : '/questionarioInicial.html'
         });
 
     } catch (error) {
@@ -80,7 +79,7 @@ export async function login(req, res) {
                 questionario_inicial: user.questionario_inicial
             },
             token,
-            redirect: user.questionario_inicial ? '/index.html' : '/questionarioInicial.html'
+            
         });
 
     } catch (error) {
