@@ -1,137 +1,132 @@
-MindTrack
+# MindTrack
 
 MindTrack é uma aplicação web voltada para suporte emocional e orientação psicológica, utilizando um chatbot interativo e questionários personalizados para ajudar os usuários a refletirem sobre suas questões emocionais.
 
-Funcionalidades
+## ✨ Funcionalidades
 
-Chatbot Athena: Um assistente virtual que oferece suporte emocional e orientação psicológica.
+- **Chatbot Athena**: Assistente virtual que oferece suporte emocional e orientação psicológica.
+- **Cadastro e Login**: Sistema de autenticação seguro para usuários.
+- **Questionário Inicial**: Personaliza a experiência do usuário com base nas respostas fornecidas.
+- **Pontuação e Nível**: Avaliação do bem-estar emocional do usuário a partir dos questionários.
 
-Cadastro e Login: Sistema de autenticação para usuários.
+---
 
-Questionário Inicial: Personalização da experiência com base nas respostas do usuário.
+## 🛠️ Instalação e Configuração
 
-Pontuação e Nível: Avaliação do bem-estar emocional do usuário com base nas respostas do questionário.
+### ⚡ Pré-requisitos
 
-Pré-requisitos e Instalação
+Antes de iniciar, certifique-se de ter as seguintes ferramentas instaladas:
 
-Pré-requisitos
+- [Node.js](https://nodejs.org/) (versão 16 ou superior)
+- [Git](https://git-scm.com/)
+- [PostgreSQL](https://www.postgresql.org/) devidamente configurado
 
-Antes de começar, certifique-se de ter as seguintes ferramentas instaladas:
+### 🔧 Instalação
 
-Node.js (versão 16 ou superior)
+1. **Clone o repositório**
 
-Git
+   ```sh
+   git clone <URL_DO_REPOSITORIO>
+   cd MindTrack
+   ```
 
-Um banco de dados PostgreSQL configurado
+2. **Instale as dependências**
 
-Instalação
+   ```sh
+   npm install
+   ```
 
-Siga os passos abaixo para baixar e configurar o projeto:
+### 🌐 Configuração e Inicialização
 
-1. Clone o repositório
+3. **Configure as variáveis de ambiente**
 
-Abra o terminal e execute o comando:
+   Crie um arquivo `.env` na raiz do projeto e adicione as seguintes variáveis:
 
-git clone <URL_DO_REPOSITORIO>
-cd MindTrack
+   ```env
+   PORT=3000
+   DB_USER=<seu_usuario>
+   DB_PASSWORD=<sua_senha>
+   DB_HOST=localhost
+   DATABASE=<nome_do_banco>
+   PORTA=5432
+   JWT_KEY=<sua_chave_secreta>
+   API_KEY=<sua_chave_da_api_groq>
+   ```
 
-2. Instale as dependências
+   Substitua `<seu_usuario>`, `<sua_senha>`, `<nome_do_banco>` e `<sua_chave_secreta>` pelos valores corretos.
 
-No diretório do projeto, execute:
+4. **Configure o banco de dados**
 
-npm install
+   Certifique-se de que o PostgreSQL está rodando e que o banco de dados possui as tabelas necessárias. Caso precise criá-las, utilize os scripts SQL fornecidos no projeto.
 
-Configuração e Inicialização
+5. **Inicie o servidor**
 
-3. Configure as variáveis de ambiente
+   ```sh
+   npm start
+   ```
 
-Crie um arquivo .env na raiz do projeto e adicione as seguintes variáveis:
+   O servidor será iniciado e estará disponível em [http://localhost:3000](http://localhost:3000).
 
-PORT=3000
-DB_USER=<seu_usuario>
-DB_PASSWORD=<sua_senha>
-DB_HOST=localhost
-DATABASE=<nome_do_banco>
-PORTA=5432
-JWT_KEY=<sua_chave_secreta>
-API_KEY=<sua_chave_da_api_groq>
+---
 
-Certifique-se de substituir <seu_usuario>, <sua_senha>, <nome_do_banco> e <sua_chave_secreta> pelos valores corretos.
+## 📚 Uso
 
-4. Configure o banco de dados
+1. **Cadastro**
+   - Acesse `public/register.html` para criar uma conta.
+   - Preencha os dados e envie o formulário.
 
-Certifique-se de que o banco de dados PostgreSQL está configurado e contém as tabelas necessárias para o funcionamento do sistema. Caso precise criar as tabelas, utilize os scripts SQL fornecidos no projeto (se houver).
+2. **Login**
+   - Acesse `public/login.html` e insira suas credenciais.
 
-5. Inicie o servidor
+3. **Questionário Inicial**
+   - Responda ao questionário para personalizar sua experiência.
 
-Execute o comando:
+4. **Chatbot Athena**
+   - Acesse `public/chat.html` para interagir com o chatbot.
 
-npm start
+5. **Pontuação**
+   - Visualize sua pontuação e nível emocional na página inicial.
 
-O servidor será iniciado e estará disponível em http://localhost:3000.
+---
 
-Uso e Estrutura do Projeto
+## 🌐 Estrutura do Projeto
 
-Uso
+```
+MindTrack/
+├── config/          # Configurações do banco de dados e da API Groq
+├── controllers/     # Lógica de negócio (autenticação, chat, questionários)
+├── middlewares/     # Middleware para autenticação JWT
+├── routes/          # Rotas da API
+├── public/          # Arquivos estáticos (HTML, CSS, JS)
+├── styles/          # Arquivos de estilos CSS
+├── js/              # Scripts de interação com a API
+└── server.js        # Arquivo principal do servidor
+```
 
-1. Cadastro
+---
 
-Acesse a página de registro (public/register.html) para criar uma conta.
+## 💻 Tecnologias Utilizadas
 
-Preencha os dados e envie o formulário.
+- **Backend**: Node.js, Express.js
+- **Banco de Dados**: PostgreSQL
+- **Frontend**: HTML, CSS, JavaScript
+- **Autenticação**: JWT
+- **Chatbot**: Groq SDK
 
-2. Login
+---
 
-Acesse a página de login (public/login.html) para entrar na aplicação.
+## 🚀 Contribuição
 
-Insira suas credenciais.
+Contribuições são bem-vindas! Para contribuir:
 
-3. Questionário Inicial
+1. Fork o repositório
+2. Crie uma nova branch (`git checkout -b minha-feature`)
+3. Faça commit das suas alterações (`git commit -m 'Adiciona nova funcionalidade'`)
+4. Envie para o repositório remoto (`git push origin minha-feature`)
+5. Abra um Pull Request
 
-Após o login, responda ao questionário inicial para personalizar sua experiência.
+---
 
-4. Chatbot
+## 📚 Licença
 
-Acesse a página de chat (public/chat.html) para interagir com o chatbot Athena.
-
-5. Pontuação
-
-Acesse a página inicial para visualizar sua pontuação e nível emocional.
-
-Estrutura do Projeto
-
-config/: Configurações do banco de dados e da API Groq.
-
-controllers/: Lógica de negócio para autenticação, chat e questionários.
-
-middlewares/: Middleware para autenticação JWT.
-
-routes/: Rotas da API.
-
-public/: Arquivos estáticos (HTML, CSS, JS).
-
-styles/: Estilos CSS.
-
-js/: Scripts de interação com a API.
-
-Tecnologias, Contribuição e Licença
-
-Tecnologias Utilizadas
-
-Backend: Node.js, Express.js
-
-Banco de Dados: PostgreSQL
-
-Frontend: HTML, CSS, JavaScript
-
-Autenticação: JWT
-
-Chatbot: Groq SDK
-
-Contribuição
-
-Contribuições são bem-vindas! Sinta-se à vontade para abrir issues ou enviar pull requests.
-
-Licença
-
-Este projeto está sob a licença MIT.
+Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para mais detalhes.
