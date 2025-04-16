@@ -16,7 +16,7 @@ export function authenticate(req, res, next) {
         }
 
         req.user = decoded; // Armazenar as informações do usuário decodificadas no request
-        next(); // Passar o controle para a próxima função
+        return next(); // Passar o controle para a próxima função
     });
 }
 

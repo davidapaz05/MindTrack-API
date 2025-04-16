@@ -56,43 +56,72 @@ export async function configChat(message) {
 
 // Função para lidar com as requisições de chat
 export async function chatHandler(req, res) {
-    // Extrai a mensagem do corpo da requisição
     const { message } = req.body;
+    const usuarioId = req.user?.id; // Supondo que o ID esteja vindo do token JWT decodificado via middleware
 
-    // Verifica se a mensagem é nula ou vazia
     if (!message) {
-        return res.status(400).json({ error: "mensagem nula" }); // Retorna erro 400 (Bad Request)
+        return res.status(400).json({ error: "mensagem nula" });
     }
 
     try {
-        // Chama a função configChat para processar a mensagem
         const resposta = await configChat(message);
-        return res.json({ response: resposta }); // Retorna a resposta gerada
+        console.log("Contexto atual:", contexto.length);
+        console.log("Usuário ID:", usuarioId);
+        // Se o contexto tiver mais de 6 interações, gera o diagnóstico:
+        if (contexto.length >= 6 && usuarioId) {
+            await diagnostico(usuarioId);
+            // você pode limpar o contexto depois, se quiser começar uma nova "sessão"
+            contexto = [];
+        }
+
+        return res.json({ response: resposta });
+
     } catch (error) {
-        // Retorna erro 500 (Internal Server Error) em caso de falha
+        console.error(error);
         return res.status(500).json({ error: "Erro ao consultar a API da Groq." });
     }
 }
 
-export async function diagnostico(){
-    const diagnostico = [{
-        role:'system',
-        content: "Você deve agora analisar o contexto de conversa e sugerir um diagnóstico para o usuário."
-    },
-    ...contexto
-];
+export async function diagnostico(usuarioId) {
+    // Filtra apenas as falas do usuário
+    const mensagensDoUsuario = contexto.filter(msg => msg.role === "user");
+
+    // Junta as mensagens em um único texto para análise
+    const falas = mensagensDoUsuario.map((msg, i) => `(${i + 1}) ${msg.content}`).join("\n");
+
+    const prompt = `
+Você é Athena, uma assistente psicológica virtual da empresa MindTrack.
+
+Com base nas falas a seguir, escreva um **diagnóstico emocional objetivo e empático**, com **no máximo 50 palavras**. Em seguida, forneça **uma dica prática de bem-estar** que possa ajudar o usuário a lidar melhor com a situação.
+
+Falas do usuário:
+${falas}
+
+Formato da resposta:
+Diagnóstico: [máx. 50 palavras]  
+Dica: [uma sugestão simples, personalizada e acolhedora]
+`;
 
     const resultado = await groq.chat.completions.create({
-        messages: diagnostico,
+        messages: [
+            { role: "user", content: prompt }
+        ],
         model: "llama-3.3-70b-versatile",
         temperature: 0.4
     });
 
-    const textoDiagostico = resultado.choices[0]?.message?.content;
+    const textoDiagnostico = resultado.choices[0]?.message?.content?.trim();
+
+    if (!textoDiagnostico) {
+        console.warn("Diagnóstico não gerado. Verifique o conteúdo retornado da IA.");
+        return "Diagnóstico não gerado. Verifique o conteúdo retornado da IA.";
+    }
+
+    console.log("Texto do diagnóstico gerado:\n", textoDiagnostico);
 
     await db.query(`
         INSERT INTO diagnosticos (usuario_id, texto) VALUES ($1, $2)
     `, [usuarioId, textoDiagnostico]);
-    
+
     return textoDiagnostico;
 }

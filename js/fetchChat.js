@@ -14,10 +14,17 @@ async function sendMessage() {
     document.getElementById('user-message').value = '';
 
     try {
+
+        const token = sessionStorage.getItem('token');
+
         const response = await fetch('http://localhost:3000/api/chat', { // Ajuste a URL se necessário
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
             body: JSON.stringify({ message: userMessage })
+            
         });
 
         if (!response.ok) {
