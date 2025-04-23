@@ -3,25 +3,31 @@ MINDTRACK/
 │   ├── .env
 │   ├── database.js
 │   ├── groqConfig.js
+│
 │── controllers/
 │   ├── authController.js
 │   ├── chatController.js
-|
-|──js/
-|   fetchLogin.js
-|   fetchRegistro.js   
-|
+│   ├── questionarioController.js
+│
+│── js/
+│   ├── fetchLogin.js
+│   ├── fetchRegistro.js   
+│   ├── fetchPontuação.js
+│   ├── fetchQuestionario.js
+│   ├── fetchChat.js
+│
 │── middlewares/
 │   ├── authenticate.js 
-|
-|  
+│
 │── node_modules/
+│
 │── routes/
 │   ├── authRoutes.js
 │   ├── chatRoutes.js
-|
-|
+│   ├── questionarioRoutes.js
+│
 │── style/
+│
 │── .gitignore
 │── package-lock.json
 │── package.json

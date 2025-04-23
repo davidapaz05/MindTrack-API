@@ -9,7 +9,6 @@ pnpm-lock.yaml
 
 # Configurações de ambiente
 .env
-config/.env
 
 # Logs
 *.log

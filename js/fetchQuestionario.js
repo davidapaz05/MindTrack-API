@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const btnEnviar = document.createElement("button");
     let perguntas = [];
     let indiceAtual = 0;
-    let respostas = {}; // Armazena as respostas do usuário
+    let respostas = {};
 
     if (!token || !user) {
         window.location.href = "/login.html";
@@ -94,17 +94,17 @@ document.addEventListener("DOMContentLoaded", function () {
     form.addEventListener("submit", async function (e) {
         e.preventDefault();
         salvarRespostaAtual();
-
+    
         const respostasArray = perguntas.map(pergunta => ({
             pergunta_id: pergunta.id,
             alternativa_id: respostas[pergunta.id] || null
         }));
-
+    
         if (respostasArray.some(r => r.alternativa_id === null)) {
             alert("Por favor, responda todas as perguntas!");
             return;
         }
-
+    
         try {
             const response = await fetch("http://localhost:3000/questionario/responder", {
                 method: "POST",
@@ -114,13 +114,41 @@ document.addEventListener("DOMContentLoaded", function () {
                 },
                 body: JSON.stringify({ usuario_id: user.id, respostas: respostasArray })
             });
-
+    
             const data = await response.json();
             if (data.success) {
                 user.questionario_inicial = true;
                 sessionStorage.setItem("user", JSON.stringify(user));
-                alert("Questionário respondido com sucesso!");
-                window.location.href = "http://localhost:3000/index.html";
+    
+                // Espera 1 segundo antes de buscar a pontuação
+                setTimeout(async () => {
+                    try {
+                        const pontuacaoRes = await fetch(`http://localhost:3000/questionario/pontuacao/${user.id}`, {
+                            headers: {
+                                "Authorization": `Bearer ${token}`,
+                                "Content-Type": "application/json"
+                            }
+                        });
+    
+                        const pontuacaoData = await pontuacaoRes.json();
+    
+                        if (pontuacaoData.success) {
+                            console.log("Pontuação:", pontuacaoData.pontuacao_total);
+                            console.log("Nível:", pontuacaoData.nivel);
+                            // alert(`Sua pontuação: ${pontuacaoData.pontuacao_total} - Nível: ${pontuacaoData.nivel}`);
+                        } else {
+                            console.warn("Pontuação não encontrada ou erro:", pontuacaoData.message);
+                        }
+    
+                        // Redireciona após tentar buscar pontuação
+                        window.location.href = "http://localhost:3000/index.html";
+    
+                    } catch (erroPontuacao) {
+                        console.error("Erro ao buscar pontuação:", erroPontuacao);
+                        window.location.href = "http://localhost:3000/index.html";
+                    }
+                }, 1000);
+    
             } else {
                 alert(`Erro: ${data.message}`);
             }
@@ -129,6 +157,7 @@ document.addEventListener("DOMContentLoaded", function () {
             alert("Erro ao enviar respostas");
         }
     });
+    
 
     form.appendChild(btnVoltar);
     form.appendChild(btnAvancar);

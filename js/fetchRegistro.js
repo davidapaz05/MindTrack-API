@@ -61,7 +61,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 // Redireciona após garantir o armazenamento
                 setTimeout(() => {
                     window.location.href = "questionarioInicial.html";
-                }, 50);
+                }, 50); 
             } else {
                 alert(`Erro: ${data.message}`);
             }
