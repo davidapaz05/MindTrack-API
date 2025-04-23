@@ -141,11 +141,11 @@ document.addEventListener("DOMContentLoaded", function () {
                         }
     
                         // Redireciona após tentar buscar pontuação
-                        window.location.href = "http://localhost:3000/index.html";
+                        window.location.href = "/public/index.html";
     
                     } catch (erroPontuacao) {
                         console.error("Erro ao buscar pontuação:", erroPontuacao);
-                        window.location.href = "http://localhost:3000/index.html";
+                        window.location.href = "/public/index.html";
                     }
                 }, 1000);
     

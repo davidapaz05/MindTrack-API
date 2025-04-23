@@ -18,7 +18,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Validação da data de nascimento (12 anos ou mais)
         if (!validarDataNascimento(dataNascimento)) {
-            alert("Você deve ter 12 anos ou mais para se cadastrar.");
+            alert("Você deve ter entre 12 a 90 anos para se cadastrar.");
             return;
         }
 
@@ -108,6 +108,6 @@ document.addEventListener("DOMContentLoaded", function () {
         }
         
         // Retorna true se a idade for 12 ou mais
-        return idade >= 12;
+        return idade >= 12 && idade <= 90;
     }
 });
