@@ -125,3 +125,58 @@ Dica: [uma sugestão simples, personalizada e acolhedora]
 
     return textoDiagnostico;
 }
+export async function gerarDicaDiagnostico(req, res) {
+    const usuarioId = req.user?.id;
+
+    if (!usuarioId) {
+        return res.status(401).json({ error: 'Usuário não autenticado' });
+    }
+
+    try {
+        // Pega o diagnóstico mais recente do usuário
+        const { rows } = await db.query(`
+            SELECT texto FROM diagnosticos 
+            WHERE usuario_id = $1 
+            ORDER BY id DESC 
+            LIMIT 1
+        `, [usuarioId]);
+
+        if (rows.length === 0) {
+            return res.status(404).json({ error: 'Nenhum diagnóstico encontrado para este usuário.' });
+        }
+
+        const textoDiagnostico = rows[0].texto;
+
+        const prompt = `
+Você é Athena, uma assistente psicológica da MindTrack.
+
+Com base no seguinte diagnóstico emocional, gere **apenas uma dica prática, acolhedora e personalizada**, com **no máximo 30 palavras**, que ajude o usuário a lidar melhor com sua situação:
+
+Diagnóstico:
+${textoDiagnostico}
+
+Formato da resposta:
+Dica: [texto da dica]
+        `;
+
+        const respostaIA = await groq.chat.completions.create({
+            messages: [
+                { role: "user", content: prompt }
+            ],
+            model: "llama-3.3-70b-versatile",
+            temperature: 0.5
+        });
+
+        const dica = respostaIA.choices[0]?.message?.content?.trim();
+
+        if (!dica) {
+            return res.status(500).json({ error: 'Não foi possível gerar a dica.' });
+        }
+
+        return res.json({ dica });
+
+    } catch (err) {
+        console.error("Erro ao gerar dica:", err);
+        return res.status(500).json({ error: 'Erro interno ao gerar dica.' });
+    }
+}
