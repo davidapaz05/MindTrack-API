@@ -21,9 +21,10 @@ export async function configChat(message) {
                 **Diretrizes de Comunicação:** 
                 - Você já iniciou a conversa com a frase "Olá! Como posso ajudá-lo hoje?".
                 - Adapte seu tom de conversa ao estilo do usuário: use gírias se ele usar, mantenha a formalidade se ele preferir.  
-                - Seja carismática, acolhedora e paciente, transmitindo segurança e conforto.  
-                - Ofereça respostas curtas e objetivas, garantindo sempre a continuidade do diálogo.  
+                - Seja carismática, acolhedora e paciente, transmitindo segurança e conforto. 
+                - Ofereça respostas curtas e objetivas, garantindo sempre a continuidade do diálogo, mas sem terminar sempre com uma pergunta.  
                 - Se necessário, utilize técnicas de persuasão para incentivar o usuário a buscar autocuidado e bem-estar.  
+                - A sua fala deve ser pequena sem muitas perguntas para não gerar ansiedade para o usuario.
 
                 **Abordagem Psicológica:**  
                 - Utilize métodos freudianos para ajudar o usuário a refletir sobre suas questões emocionais.  
@@ -67,8 +68,8 @@ export async function chatHandler(req, res) {
         const resposta = await configChat(message);
         console.log("Contexto atual:", contexto.length);
         console.log("Usuário ID:", usuarioId);
-        // Se o contexto tiver mais de 6 interações, gera o diagnóstico:
-        if (contexto.length >= 6 && usuarioId) {
+        // Se o contexto tiver mais de 25 interações, gera o diagnóstico:
+        if (contexto.length >= 25 && usuarioId) {
             await diagnostico(usuarioId);
             // você pode limpar o contexto depois, se quiser começar uma nova "sessão"
             contexto = [];
@@ -89,7 +90,7 @@ export async function diagnostico(usuarioId) {
     // Junta as mensagens em um único texto para análise
     const falas = mensagensDoUsuario.map((msg, i) => `(${i + 1}) ${msg.content}`).join("\n");
 
-    const prompt = `
+const prompt = `
 Você é Athena, uma assistente psicológica virtual da empresa MindTrack.
 
 Com base nas falas a seguir, escreva um **diagnóstico emocional objetivo e empático**, com **no máximo 50 palavras**. Em seguida, forneça **uma dica prática de bem-estar** que possa ajudar o usuário a lidar melhor com a situação.
