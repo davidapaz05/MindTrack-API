@@ -50,7 +50,10 @@ export async function getPontuacaoUsuario(req, res) {
 export async function getPerguntas(req, res) {
     console.log("Recebida requisição para /perguntas"); // Loga a requisição recebida
     try {
-        // Consulta todas as perguntas e suas alternativas no banco de dados
+        // Verifica se é o questionário inicial (usando o parâmetro da query)
+        const isQuestionarioInicial = req.query.questionario_inicial === 'true';
+        
+        // Consulta as perguntas e suas alternativas no banco de dados
         const perguntas = await banco.query(`
             SELECT p.id, p.texto, 
                    json_agg(json_build_object(
@@ -60,9 +63,10 @@ export async function getPerguntas(req, res) {
                    )) as alternativas
             FROM perguntas p
             JOIN alternativas a ON p.id = a.pergunta_id
+            WHERE $1 = false OR p.id <= 10
             GROUP BY p.id
             ORDER BY p.id
-        `);
+        `, [isQuestionarioInicial]);
         
         console.log("Perguntas encontradas:", perguntas.rows.length); // Loga a quantidade de perguntas encontradas
         

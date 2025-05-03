@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Questionário Diário | MindTrack</title>
+    <link rel="stylesheet" href="/styles/questionarioInicial.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Questionário Diário</h1>
+            <p>Responda às perguntas abaixo para acompanhar seu bem-estar diário.</p>
+        </header>
+
+        <main>
+            <form id="questionario-form">
+                <div id="questionario-container">
+                    <!-- Perguntas carregadas dinamicamente -->
+                    <div id="loading">Carregando perguntas...</div>
+                </div>
+            </form>
+        </main>
+    </div>
+
+    <script src="/js/fetchQuestionarioDiario.js"></script>
+</body>
+</html> 

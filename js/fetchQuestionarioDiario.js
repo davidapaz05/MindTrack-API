@@ -15,15 +15,47 @@ document.addEventListener("DOMContentLoaded", function () {
         return;
     }
 
+    // Verifica se o usuário já respondeu o questionário hoje
+    async function verificarQuestionarioDiario() {
+        try {
+            const response = await fetch(`http://localhost:3000/questionario/diario/verificar/${user.id}`, {
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                }
+            });
+
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            const data = await response.json();
+            
+            if (data.ja_respondido) {
+                container.innerHTML = `
+                    <div class="message">
+                        <p>Você já respondeu o questionário diário hoje.</p>
+                        <p>Volte amanhã para responder novamente!</p>
+                    </div>
+                `;
+                return false;
+            }
+            return true;
+        } catch (error) {
+            console.error("Erro ao verificar questionário diário:", error);
+            container.innerHTML = `
+                <div class="error">
+                    <p>Erro ao verificar questionário diário</p>
+                    <p>${error.message}</p>
+                    <button onclick="window.location.reload()">Tentar novamente</button>
+                </div>
+            `;
+            return false;
+        }
+    }
+
     async function carregarPerguntas() {
         try {
             container.innerHTML = '<div class="loading">Carregando perguntas...</div>';
             
-            // Verifica se é o questionário inicial
-            const isQuestionarioInicial = window.location.pathname.includes('questionarioInicial.html');
-            const url = `http://localhost:3000/questionario/perguntas${isQuestionarioInicial ? '?questionario_inicial=true' : ''}`;
-            
-            const response = await fetch(url, {
+            const response = await fetch("http://localhost:3000/questionario/diario/perguntas", {
                 headers: {
                     "Authorization": `Bearer ${token}`,
                     "Content-Type": "application/json"
@@ -111,7 +143,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     
         try {
-            const response = await fetch("http://localhost:3000/questionario/responder", {
+            const response = await fetch("http://localhost:3000/questionario/diario/responder", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -122,38 +154,8 @@ document.addEventListener("DOMContentLoaded", function () {
     
             const data = await response.json();
             if (data.success) {
-                user.questionario_inicial = true;
-                sessionStorage.setItem("user", JSON.stringify(user));
-    
-                // Espera 1 segundo antes de buscar a pontuação
-                setTimeout(async () => {
-                    try {
-                        const pontuacaoRes = await fetch(`http://localhost:3000/questionario/pontuacao/${user.id}`, {
-                            headers: {
-                                "Authorization": `Bearer ${token}`,
-                                "Content-Type": "application/json"
-                            }
-                        });
-    
-                        const pontuacaoData = await pontuacaoRes.json();
-    
-                        if (pontuacaoData.success) {
-                            console.log("Pontuação:", pontuacaoData.pontuacao_total);
-                            console.log("Nível:", pontuacaoData.nivel);
-                            // alert(`Sua pontuação: ${pontuacaoData.pontuacao_total} - Nível: ${pontuacaoData.nivel}`);
-                        } else {
-                            console.warn("Pontuação não encontrada ou erro:", pontuacaoData.message);
-                        }
-    
-                        // Redireciona após tentar buscar pontuação
-                        window.location.href = "/public/index.html";
-    
-                    } catch (erroPontuacao) {
-                        console.error("Erro ao buscar pontuação:", erroPontuacao);
-                        window.location.href = "/public/index.html";
-                    }
-                }, 1000);
-    
+                alert("Questionário diário respondido com sucesso!");
+                window.location.href = "/public/index.html";
             } else {
                 alert(`Erro: ${data.message}`);
             }
@@ -162,10 +164,18 @@ document.addEventListener("DOMContentLoaded", function () {
             alert("Erro ao enviar respostas");
         }
     });
-    
 
     form.appendChild(btnVoltar);
     form.appendChild(btnAvancar);
     form.appendChild(btnEnviar);
-    carregarPerguntas();
-});
+
+    // Inicializa o questionário diário
+    async function init() {
+        const podeResponder = await verificarQuestionarioDiario();
+        if (podeResponder) {
+            carregarPerguntas();
+        }
+    }
+
+    init();
+}); 
