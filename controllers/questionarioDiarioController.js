@@ -6,8 +6,8 @@ export async function verificarQuestionarioDiario(req, res) {
 
     try {
         const resultado = await banco.query(`
-            SELECT id FROM questionarios_diarios 
-            WHERE usuario_id = $1 AND data_resposta = CURRENT_DATE
+            SELECT id FROM questionarios 
+            WHERE usuario_id = $1 AND data = CURRENT_DATE
         `, [usuario_id]);
 
         res.status(200).json({
@@ -15,10 +15,10 @@ export async function verificarQuestionarioDiario(req, res) {
             ja_respondido: resultado.rows.length > 0
         });
     } catch (error) {
-        console.error('Erro ao verificar questionário diário:', error);
+        console.error('Erro ao verificar questionario diario:', error);
         res.status(500).json({
             success: false,
-            message: 'Erro ao verificar questionário diário',
+            message: 'Erro ao verificar questionario diario',
             error: error.message
         });
     }
@@ -46,10 +46,10 @@ export async function getPerguntasDiarias(req, res) {
             perguntas: perguntas.rows
         });
     } catch (error) {
-        console.error('Erro ao buscar perguntas diárias:', error);
+        console.error('Erro ao buscar perguntas diarias:', error);
         res.status(500).json({
             success: false,
-            message: 'Erro ao buscar perguntas diárias',
+            message: 'Erro ao buscar perguntas diarias',
             error: error.message
         });
     }
@@ -62,14 +62,14 @@ export async function salvarRespostasDiarias(req, res) {
     try {
         // Verifica se o usuário já respondeu hoje
         const verificar = await banco.query(`
-            SELECT id FROM questionarios_diarios 
-            WHERE usuario_id = $1 AND data_resposta = CURRENT_DATE
+            SELECT id FROM questionarios
+            WHERE usuario_id = $1 AND data = CURRENT_DATE
         `, [usuario_id]);
 
         if (verificar.rows.length > 0) {
             return res.status(400).json({
                 success: false,
-                message: 'Você já respondeu o questionário hoje'
+                message: 'Voce ja respondeu o questionario hoje'
             });
         }
 
@@ -92,14 +92,14 @@ export async function salvarRespostasDiarias(req, res) {
 
         res.status(200).json({
             success: true,
-            message: 'Questionário diário respondido com sucesso'
+            message: 'Questionario diario respondido com sucesso'
         });
 
     } catch (error) {
-        console.error('Erro ao salvar respostas diárias:', error);
+        console.error('Erro ao salvar respostas diarias:', error);
         res.status(500).json({
             success: false,
-            message: 'Erro ao salvar respostas diárias',
+            message: 'Erro ao salvar respostas diarias',
             error: error.message
         });
     }

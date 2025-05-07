@@ -1,3 +1,5 @@
+import { verificarQuestionarioDiario } from './verificarQuestionarioDiario.js';
+
 document.addEventListener("DOMContentLoaded", function () {
     const token = sessionStorage.getItem("token");
     const user = JSON.parse(sessionStorage.getItem("user"));
@@ -13,42 +15,6 @@ document.addEventListener("DOMContentLoaded", function () {
     if (!token || !user) {
         window.location.href = "/login.html";
         return;
-    }
-
-    // Verifica se o usuário já respondeu o questionário hoje
-    async function verificarQuestionarioDiario() {
-        try {
-            const response = await fetch(`http://localhost:3000/questionario/diario/verificar/${user.id}`, {
-                headers: {
-                    "Authorization": `Bearer ${token}`,
-                    "Content-Type": "application/json"
-                }
-            });
-
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-            const data = await response.json();
-            
-            if (data.ja_respondido) {
-                container.innerHTML = `
-                    <div class="message">
-                        <p>Você já respondeu o questionário diário hoje.</p>
-                        <p>Volte amanhã para responder novamente!</p>
-                    </div>
-                `;
-                return false;
-            }
-            return true;
-        } catch (error) {
-            console.error("Erro ao verificar questionário diário:", error);
-            container.innerHTML = `
-                <div class="error">
-                    <p>Erro ao verificar questionário diário</p>
-                    <p>${error.message}</p>
-                    <button onclick="window.location.reload()">Tentar novamente</button>
-                </div>
-            `;
-            return false;
-        }
     }
 
     async function carregarPerguntas() {
@@ -171,9 +137,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Inicializa o questionário diário
     async function init() {
-        const podeResponder = await verificarQuestionarioDiario();
+        const podeResponder = await verificarQuestionarioDiario(user.id, token);
         if (podeResponder) {
             carregarPerguntas();
+        } else {
+            container.innerHTML = `
+                <div class="message">
+                    <p>Você já respondeu o questionário diário hoje.</p>
+                    <p>Volte amanhã para responder novamente!</p>
+                </div>
+            `;
         }
     }
 

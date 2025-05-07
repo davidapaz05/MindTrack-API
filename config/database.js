@@ -23,17 +23,4 @@ banco.connect()
     .then(() => console.log("Banco de dados conectado!")) // Mensagem de sucesso ao conectar
     .catch(err => console.error("Erro ao conectar ao banco:", err)); // Mensagem de erro caso a conexão falhe
 
-// Criação da tabela de questionários diários
-banco.query(`
-    CREATE TABLE IF NOT EXISTS questionarios_diarios (
-        id SERIAL PRIMARY KEY,
-        usuario_id INTEGER REFERENCES usuarios(id),
-        data_resposta DATE DEFAULT CURRENT_DATE,
-        UNIQUE(usuario_id, data_resposta)
-    );
-`)
-    .then(() => console.log("Tabela questionários_diarios criada com sucesso!"))
-    .catch(err => console.error("Erro ao criar tabela questionários_diarios:", err));
-
-// Exporta a instância do banco para ser usada em outros arquivos
 export default banco;

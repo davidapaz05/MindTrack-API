@@ -4,14 +4,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <style>
+        .questionario-btn {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        .questionario-btn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        #mensagemQuestionario {
+            margin-top: 10px;
+            color: #666;
+        }
+    </style>
 </head>
 <body>
     <h1>Textos</h1>
     <div id="pontuacao">Carregando pontuação...</div>
 
+    <button id="questionarioBtn" class="questionario-btn">Questionário Diário</button>
+    <div id="mensagemQuestionario"></div>
     
     <a href="./chat.html">chat</a>
     <script src="/js/fetchPontuação.js" defer></script>
     <script src="/js/fetchDica.js"></script>
+    <script src="/js/fetchBotao.js" type="module"></script>
 </body>
 </html>
