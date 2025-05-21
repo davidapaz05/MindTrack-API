@@ -8,10 +8,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('mensagemQuestionario').textContent = 'Faça login para responder o questionário diário.';
         return;
     }
-    const jaRespondido = await verificarQuestionarioDiario(user.id, token);
+    const podeResponder = await verificarQuestionarioDiario(user.id, token);
     const btn = document.getElementById('questionarioBtn');
     const msg = document.getElementById('mensagemQuestionario');
-    if (jaRespondido) {
+    if (!podeResponder) {
         btn.disabled = true;
         msg.textContent = 'Você já respondeu o questionário diário hoje.';
     } else {

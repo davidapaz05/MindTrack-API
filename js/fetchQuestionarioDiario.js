@@ -3,6 +3,9 @@ import { verificarQuestionarioDiario } from './verificarQuestionarioDiario.js';
 document.addEventListener("DOMContentLoaded", function () {
     const token = sessionStorage.getItem("token");
     const user = JSON.parse(sessionStorage.getItem("user"));
+    console.log("Token disponível:", !!token);
+    console.log("Usuário carregado:", user);
+
     const container = document.getElementById("questionario-container");
     const form = document.getElementById("questionario-form");
     const btnAvancar = document.createElement("button");
@@ -13,14 +16,17 @@ document.addEventListener("DOMContentLoaded", function () {
     let respostas = {};
 
     if (!token || !user) {
+        console.log("Redirecionando para login - Token ou usuário não encontrado");
         window.location.href = "/login.html";
         return;
     }
 
     async function carregarPerguntas() {
         try {
+            console.log("Iniciando carregamento das perguntas...");
             container.innerHTML = '<div class="loading">Carregando perguntas...</div>';
             
+            console.log("Fazendo requisição para /questionario/diario/perguntas");
             const response = await fetch("http://localhost:3000/questionario/diario/perguntas", {
                 headers: {
                     "Authorization": `Bearer ${token}`,
@@ -28,14 +34,19 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
             });
 
+            console.log("Status da resposta:", response.status);
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            
             const data = await response.json();
+            console.log("Dados recebidos:", data);
+            
             if (!data.success) throw new Error(data.message || "Erro desconhecido no servidor");
 
             perguntas = data.perguntas;
+            console.log("Perguntas carregadas:", perguntas.length);
             exibirPergunta(indiceAtual);
         } catch (error) {
-            console.error("Erro detalhado:", error);
+            console.error("Erro detalhado ao carregar perguntas:", error);
             container.innerHTML = `
                 <div class="error">
                     <p>Erro ao carregar perguntas</p>
@@ -137,14 +148,30 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Inicializa o questionário diário
     async function init() {
-        const podeResponder = await verificarQuestionarioDiario(user.id, token);
-        if (podeResponder) {
-            carregarPerguntas();
-        } else {
+        console.log("Iniciando verificação do questionário...");
+        try {
+            const podeResponder = await verificarQuestionarioDiario(user.id, token);
+            console.log("Resultado da verificação - pode responder:", podeResponder);
+            
+            if (podeResponder) {
+                console.log("Carregando perguntas...");
+                await carregarPerguntas();
+            } else {
+                console.log("Usuário já respondeu hoje");
+                container.innerHTML = `
+                    <div class="message">
+                        <p>Você já respondeu o questionário diário hoje.</p>
+                        <p>Volte amanhã para responder novamente!</p>
+                    </div>
+                `;
+            }
+        } catch (error) {
+            console.error("Erro durante a inicialização:", error);
             container.innerHTML = `
-                <div class="message">
-                    <p>Você já respondeu o questionário diário hoje.</p>
-                    <p>Volte amanhã para responder novamente!</p>
+                <div class="error">
+                    <p>Erro ao inicializar questionário</p>
+                    <p>${error.message}</p>
+                    <button onclick="window.location.reload()">Tentar novamente</button>
                 </div>
             `;
         }

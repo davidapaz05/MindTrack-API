@@ -4,65 +4,117 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 // Importa a configuração do banco de dados
 import banco from '../config/database.js';
-
+import transporter from '../config/emailConfig.js';
+import dotenv from 'dotenv';
+dotenv.config();
 // Chave secreta usada para assinar os tokens JWT
 const SECRET_KEY = process.env.JWT_KEY;
 
 // Função para registrar um novo usuário
+// Gera um código de verificação de 6 dígitos
+function gerarCodigoVerificacao() {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+// Função para registrar um novo usuário
 export async function register(req, res) {
-    // Extrai os dados do corpo da requisição
     const { nome, email, senha, confirmarSenha, data_nascimento } = req.body;
 
-    // Verifica se as senhas coincidem
     if (senha !== confirmarSenha) {
-        return res.status(400).json({ success: false, message: 'as senhas não coincidem' });
+        return res.status(400).json({ success: false, message: 'As senhas não coincidem' });
     }
 
     try {
-        // Verifica se o email já está registrado no banco de dados
         const { rows } = await banco.query('SELECT * FROM usuarios WHERE email = $1', [email]);
         if (rows.length > 0) {
             return res.status(400).json({ success: false, message: 'Email já registrado' });
         }
 
-        // Gera um salt para a criptografia da senha
         const salt = await bcrypt.genSalt(10);
-        // Criptografa a senha do usuário
         const senhaCriptografada = await bcrypt.hash(senha, salt);
 
-        // Insere o novo usuário no banco de dados
+        const codigoVerificacao = gerarCodigoVerificacao();
+
+        await transporter.sendMail({
+            from: `"MindTrack" <${process.env.EMAIL_USER}>`,
+            to: email,
+            subject: 'Código de Verificação - MindTrack',
+            text: `Seu código de verificação é: ${codigoVerificacao}`,
+        });
+
         const novoUsuario = await banco.query(
-            'INSERT INTO usuarios (nome, email, senha, data_nascimento, questionario_inicial) VALUES ($1, $2, $3, $4, $5) RETURNING id, nome, email, data_nascimento, questionario_inicial',
-            [nome, email, senhaCriptografada, data_nascimento, false]
+            'INSERT INTO usuarios (nome, email, senha, data_nascimento, questionario_inicial, email_verificado, codigo_verificacao) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id, nome, email, data_nascimento, questionario_inicial',
+            [nome, email, senhaCriptografada, data_nascimento, false, false, codigoVerificacao]
         );
 
-        // Obtém os dados do usuário recém-criado
         const user = novoUsuario.rows[0];
 
-        // Gera um token JWT para o usuário
-        const token = jwt.sign({ id: user.id, email: user.email }, SECRET_KEY, { expiresIn: '1h' });
-
-        // Retorna uma resposta de sucesso com os dados do usuário e o token
         return res.status(201).json({
             success: true,
-            message: 'Registro bem-sucedido',
+            message: 'Código de verificação enviado para o e-mail. Verifique para concluir o registro.',
             user: {
                 id: user.id,
                 nome: user.nome,
                 email: user.email,
                 data_nascimento: user.data_nascimento,
                 questionario_inicial: user.questionario_inicial
-            },
-            token,
+            }
         });
 
     } catch (error) {
-        // Loga o erro no console e retorna uma resposta de erro
         console.error('Erro no registro:', error);
-        return res.status(500).json({ 
-            success: false, 
-            message: 'Erro ao registrar o usuário', 
-            error: error.message 
+        return res.status(500).json({
+            success: false,
+            message: 'Erro ao registrar o usuário',
+            error: error.message
+        });
+    }
+}
+
+// Função para verificar o código de e-mail
+export async function verifyEmail(req, res) {
+    const { email, codigo } = req.body;
+
+    try {
+        const { rows } = await banco.query('SELECT * FROM usuarios WHERE email = $1', [email]);
+        if (rows.length === 0) {
+            return res.status(404).json({ success: false, message: 'Usuário não encontrado' });
+        }
+
+        const user = rows[0];
+        if (user.email_verificado) {
+            return res.status(400).json({ success: false, message: 'E-mail já verificado' });
+        }
+
+        if (user.codigo_verificacao !== codigo) {
+            return res.status(400).json({ success: false, message: 'Código de verificação inválido' });
+        }
+
+        await banco.query(
+            'UPDATE usuarios SET email_verificado = true, codigo_verificacao = null WHERE email = $1',
+            [email]
+        );
+
+        const token = jwt.sign({ id: user.id, email: user.email }, SECRET_KEY, { expiresIn: '1h' });
+
+        return res.status(200).json({
+            success: true,
+            message: 'E-mail verificado com sucesso!',
+            token,
+            user: {
+                id: user.id,
+                nome: user.nome,
+                email: user.email,
+                questionario_inicial: user.questionario_inicial
+            }
+        });
+
+    } catch (error) {
+        console.error('Erro ao verificar e-mail:', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Erro ao verificar e-mail',
+            error: error.message
         });
     }
 }

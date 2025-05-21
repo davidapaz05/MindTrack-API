@@ -9,10 +9,12 @@ export async function verificarQuestionarioDiario(req, res) {
             SELECT id FROM questionarios 
             WHERE usuario_id = $1 AND data = CURRENT_DATE
         `, [usuario_id]);
+        
+        const ja_respondido = resultado.rows.length > 0;
 
         res.status(200).json({
             success: true,
-            ja_respondido: resultado.rows.length > 0
+            ja_respondido: ja_respondido
         });
     } catch (error) {
         console.error('Erro ao verificar questionario diario:', error);
