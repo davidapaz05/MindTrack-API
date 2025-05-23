@@ -106,7 +106,6 @@ MindTrack/
 
 - **Backend**: Node.js, Express.js
 - **Banco de Dados**: PostgreSQL
-- **Frontend**: HTML, CSS, JavaScript
 - **Autenticação**: JWT
 - **Chatbot**: Groq SDK
 
