@@ -31,3 +31,10 @@ Thumbs.db
 dist/
 build/
 
+# Pastas do projeto
+public/
+
+styles/
+
+js/
+
