@@ -11,9 +11,9 @@ dotenv.config();
 const SECRET_KEY = process.env.JWT_KEY;
 
 // Função para registrar um novo usuário
-// Gera um código de verificação de 6 dígitos
+// Gera um código de verificação de 4 dígitos
 function gerarCodigoVerificacao() {
-    return Math.floor(100000 + Math.random() * 900000).toString();
+    return Math.floor(1000 + Math.random() * 9000).toString();
 }
 
 // Função para registrar um novo usuário
