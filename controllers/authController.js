@@ -39,7 +39,9 @@ export async function register(req, res) {
             from: `"MindTrack" <${process.env.EMAIL_USER}>`,
             to: email,
             subject: 'Código de Verificação - MindTrack',
-            text: `Seu código de verificação é: ${codigoVerificacao}`,
+            text: `Seu código de verificação é: ${codigoVerificacao} use-o para verificar seu e-mail.
+            Se você não solicitou este código, ignore este e-mail.
+            Atenciosamente, Equipe MindTrack.`,
         });
 
         const novoUsuario = await banco.query(
@@ -163,5 +165,57 @@ export async function login(req, res) {
             message: 'Erro ao realizar login',
             error: error.message 
         });
+    }
+}
+
+export async function enviarCodigoRecuperacao(req, res) {
+    const { email } = req.body;
+    try {
+        const { rows } = await banco.query('SELECT * FROM usuarios WHERE email = $1', [email]);
+        if (rows.length === 0) {
+            return res.status(404).json({ success: false, message: 'E-mail não encontrado' });
+        }
+        const codigo = gerarCodigoVerificacao();
+        await banco.query('UPDATE usuarios SET codigo_recuperacao = $1 WHERE email = $2', [codigo, email]);
+        await transporter.sendMail({
+            from: `"MindTrack" <${process.env.EMAIL_USER}>`,
+            to: email,
+            subject: 'Código de Recuperação de Senha - MindTrack',
+            text: `Seu código de recuperação é: ${codigo}`,
+        });
+        return res.status(200).json({ success: true, message: 'Código enviado para o e-mail' });
+    } catch (error) {
+        return res.status(500).json({ success: false, message: 'Erro ao enviar código', error: error.message });
+    }
+}
+
+export async function verificarCodigoRecuperacao(req, res) {
+    const { email, codigo } = req.body;
+    try {
+        const { rows } = await banco.query('SELECT * FROM usuarios WHERE email = $1', [email]);
+        if (rows.length === 0) {
+            return res.status(404).json({ success: false, message: 'E-mail não encontrado' });
+        }
+        if (rows[0].codigo_recuperacao !== codigo) {
+            return res.status(400).json({ success: false, message: 'Código inválido' });
+        }
+        return res.status(200).json({ success: true, message: 'Código válido' });
+    } catch (error) {
+        return res.status(500).json({ success: false, message: 'Erro ao verificar código', error: error.message });
+    }
+}
+
+export async function redefinirSenha(req, res) {
+    const { email, senha, confirmarSenha } = req.body;
+    if (senha !== confirmarSenha) {
+        return res.status(400).json({ success: false, message: 'As senhas não coincidem' });
+    }
+    try {
+        const salt = await bcrypt.genSalt(10);
+        const senhaCriptografada = await bcrypt.hash(senha, salt);
+        await banco.query('UPDATE usuarios SET senha = $1, codigo_recuperacao = null WHERE email = $2', [senhaCriptografada, email]);
+        return res.status(200).json({ success: true, message: 'Senha redefinida com sucesso' });
+    } catch (error) {
+        return res.status(500).json({ success: false, message: 'Erro ao redefinir senha', error: error.message });
     }
 }

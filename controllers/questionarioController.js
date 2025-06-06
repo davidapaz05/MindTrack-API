@@ -131,3 +131,42 @@ export async function salvarRespostas(req, res) {
         });
     }
 }
+
+// Função para obter o histórico de questionários do usuário (data e pontuação)
+export async function getHistoricoQuestionarios(req, res) {
+    console.log('Requisição recebida para histórico:', req.params);
+    const { usuario_id } = req.params;
+
+    if (!usuario_id) {
+        console.error('Erro: ID de usuário não fornecido na requisição.');
+        return res.status(400).json({ 
+            success: false, 
+            message: 'ID de usuário não fornecido.' 
+        });
+    }
+
+    try {
+        const resultado = await banco.query(`
+            SELECT 
+                id AS questionario_id,
+                data
+            FROM 
+                questionarios
+            WHERE 
+                usuario_id = $1
+            ORDER BY 
+                data DESC;
+        `, [usuario_id]);
+
+        console.log('Resultado da busca:', resultado.rows);
+
+        res.status(200).json(resultado.rows);
+    } catch (error) {
+        console.error("Erro ao buscar histórico de questionários:", error);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Erro ao buscar histórico de questionários',
+            error: error.message
+        });
+    }
+}

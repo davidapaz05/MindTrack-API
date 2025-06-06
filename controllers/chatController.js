@@ -69,7 +69,7 @@ export async function chatHandler(req, res) {
         console.log("Contexto atual:", contexto.length);
         console.log("Usuário ID:", usuarioId);
         // Se o contexto tiver mais de 25 interações, gera o diagnóstico:
-        if (contexto.length >= 25 && usuarioId) {
+        if (contexto.length >= 10 && usuarioId) {
             await diagnostico(usuarioId);
             // você pode limpar o contexto depois, se quiser começar uma nova "sessão"
             contexto = [];
