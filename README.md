@@ -97,9 +97,6 @@ MindTrack/
 ├── controllers/     # Lógica de negócio (autenticação, chat, questionários)
 ├── middlewares/     # Middleware para autenticação JWT
 ├── routes/          # Rotas da API
-├── public/          # Arquivos estáticos (HTML, CSS, JS)
-├── styles/          # Arquivos de estilos CSS
-├── js/              # Scripts de interação com a API
 └── server.js        # Arquivo principal do servidor
 ```
 
@@ -109,7 +106,6 @@ MindTrack/
 
 - **Backend**: Node.js, Express.js
 - **Banco de Dados**: PostgreSQL
-- **Frontend**: HTML, CSS, JavaScript
 - **Autenticação**: JWT
 - **Chatbot**: Groq SDK
 
