@@ -39,9 +39,7 @@ export async function register(req, res) {
             from: `"MindTrack" <${process.env.EMAIL_USER}>`,
             to: email,
             subject: 'Código de Verificação - MindTrack',
-            text: `Seu código de verificação é: ${codigoVerificacao} use-o para verificar seu e-mail.
-            Se você não solicitou este código, ignore este e-mail.
-            Atenciosamente, Equipe MindTrack.`,
+            text: `Seu código de verificação é: ${codigoVerificacao} use-o para verificar seu e-mail. Se você não solicitou este código, ignore este e-mail. Atenciosamente, Equipe MindTrack.`,
         });
 
         const novoUsuario = await banco.query(
@@ -176,7 +174,8 @@ export async function enviarCodigoRecuperacao(req, res) {
             return res.status(404).json({ success: false, message: 'E-mail não encontrado' });
         }
         const codigo = gerarCodigoVerificacao();
-        await banco.query('UPDATE usuarios SET codigo_recuperacao = $1 WHERE email = $2', [codigo, email]);
+        // Zera o contador de tentativas ao enviar um novo código
+        await banco.query('UPDATE usuarios SET codigo_recuperacao = $1, tentativas_recuperacao = 0 WHERE email = $2', [codigo, email]);
         await transporter.sendMail({
             from: `"MindTrack" <${process.env.EMAIL_USER}>`,
             to: email,
@@ -196,9 +195,20 @@ export async function verificarCodigoRecuperacao(req, res) {
         if (rows.length === 0) {
             return res.status(404).json({ success: false, message: 'E-mail não encontrado' });
         }
-        if (rows[0].codigo_recuperacao !== codigo) {
+        const user = rows[0];
+        if (user.codigo_recuperacao !== codigo) {
+            // Incrementa o contador de tentativas
+            const tentativas = (user.tentativas_recuperacao || 0) + 1;
+            await banco.query('UPDATE usuarios SET tentativas_recuperacao = $1 WHERE email = $2', [tentativas, email]);
+            if (tentativas >= 3) {
+                // Se exceder 3 tentativas, zera o código e o contador
+                await banco.query('UPDATE usuarios SET codigo_recuperacao = null, tentativas_recuperacao = 0 WHERE email = $1', [email]);
+                return res.status(400).json({ success: false, message: 'Número máximo de tentativas excedido. Solicite um novo código.' });
+            }
             return res.status(400).json({ success: false, message: 'Código inválido' });
         }
+        // Se o código estiver correto, zera o contador de tentativas
+        await banco.query('UPDATE usuarios SET tentativas_recuperacao = 0 WHERE email = $1', [email]);
         return res.status(200).json({ success: true, message: 'Código válido' });
     } catch (error) {
         return res.status(500).json({ success: false, message: 'Erro ao verificar código', error: error.message });
@@ -213,7 +223,8 @@ export async function redefinirSenha(req, res) {
     try {
         const salt = await bcrypt.genSalt(10);
         const senhaCriptografada = await bcrypt.hash(senha, salt);
-        await banco.query('UPDATE usuarios SET senha = $1, codigo_recuperacao = null WHERE email = $2', [senhaCriptografada, email]);
+        // Zera o código de recuperação e o contador de tentativas ao redefinir a senha
+        await banco.query('UPDATE usuarios SET senha = $1, codigo_recuperacao = null, tentativas_recuperacao = 0 WHERE email = $2', [senhaCriptografada, email]);
         return res.status(200).json({ success: true, message: 'Senha redefinida com sucesso' });
     } catch (error) {
         return res.status(500).json({ success: false, message: 'Erro ao redefinir senha', error: error.message });

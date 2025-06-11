@@ -21,6 +21,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(express.static("public"));
 
+app.use('/uploads', express.static('uploads'));
 app.use('/api', chatRoutes);
 app.use('/auth', authRoutes);
 app.use('/questionario', questionarioRoutes);

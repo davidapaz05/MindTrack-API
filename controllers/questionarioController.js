@@ -17,21 +17,22 @@ export async function getPontuacaoUsuario(req, res) {
 
         // Obtém a pontuação total do resultado da consulta
         const pontuacao = resultado.rows[0].pontuacao_total;
+        const nota_convertida = Math.round((pontuacao / 40) * 10 * 100) / 100;
         let nivel;
 
-        // Define o nível do usuário com base na pontuação
-        if (pontuacao <= 19) {
+        // Define o nível do usuário com base na nota convertida
+        if (nota_convertida <= 4.9) {
             nivel = "Ruim";
-        } else if (pontuacao <= 29) {
+        } else if (nota_convertida <= 7.4) {
             nivel = "Neutro";
         } else {
             nivel = "Bom";
         }
 
-        // Retorna a pontuação total e o nível do usuário
+        // Retorna a nota convertida e o nível do usuário
         res.status(200).json({
             success: true,
-            pontuacao_total: pontuacao,
+            nota: nota_convertida,
             nivel: nivel
         });
 
@@ -94,8 +95,8 @@ export async function salvarRespostas(req, res) {
     try {
         // Cria um novo questionário para o usuário no banco de dados
         const questionario = await banco.query(
-            'INSERT INTO questionarios (usuario_id) VALUES ($1) RETURNING id',
-            [usuario_id]
+            'INSERT INTO questionarios (usuario_id, tipo) VALUES ($1, $2) RETURNING id',
+            [usuario_id, 'Inicial']
         );
         const questionario_id = questionario.rows[0].id;
 
@@ -148,14 +149,21 @@ export async function getHistoricoQuestionarios(req, res) {
     try {
         const resultado = await banco.query(`
             SELECT 
-                id AS questionario_id,
-                data
+                q.id AS questionario_id,
+                q.data,
+                q.tipo,
+                COALESCE(SUM(a.pontuacao), 0) AS pontuacao,
+                ROUND((COALESCE(SUM(a.pontuacao), 0) / 40.0) * 10, 2) AS nota_convertida
             FROM 
-                questionarios
+                questionarios q
+            LEFT JOIN respostas r ON r.questionario_id = q.id
+            LEFT JOIN alternativas a ON r.alternativa_id = a.id
             WHERE 
-                usuario_id = $1
+                q.usuario_id = $1
+            GROUP BY 
+                q.id, q.data, q.tipo
             ORDER BY 
-                data DESC;
+                q.data DESC;
         `, [usuario_id]);
 
         console.log('Resultado da busca:', resultado.rows);
