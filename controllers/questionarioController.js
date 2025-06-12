@@ -3,10 +3,25 @@ import banco from '../config/database.js';
 
 // Função para obter a pontuação total de um usuário com base em suas respostas
 export async function getPontuacaoUsuario(req, res) {
-    // Extrai o ID do usuário dos parâmetros da requisição
     const { usuario_id } = req.params;
 
+    if (!usuario_id) {
+        return res.status(400).json({
+            success: false,
+            message: 'ID do usuário não fornecido. Por favor, forneça um ID válido.'
+        });
+    }
+
     try {
+        // Verifica se o usuário existe
+        const usuarioExiste = await banco.query('SELECT id FROM usuarios WHERE id = $1', [usuario_id]);
+        if (usuarioExiste.rows.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'Usuário não encontrado. Verifique se o ID está correto.'
+            });
+        }
+
         // Consulta a pontuação total do usuário somando as pontuações das alternativas escolhidas
         const resultado = await banco.query(`
             SELECT COALESCE(SUM(a.pontuacao), 0) AS pontuacao_total
@@ -30,26 +45,25 @@ export async function getPontuacaoUsuario(req, res) {
         }
 
         // Retorna a nota convertida e o nível do usuário
-        res.status(200).json({
+        return res.status(200).json({
             success: true,
             nota: nota_convertida,
-            nivel: nivel
+            nivel: nivel,
+            message: 'Pontuação calculada com sucesso.'
         });
 
     } catch (error) {
-        // Loga o erro no console e retorna uma resposta de erro
         console.error("Erro ao calcular pontuação:", error);
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
-            message: "Erro ao calcular pontuação",
-            error: error.message
+            message: 'Não foi possível calcular sua pontuação neste momento. Por favor, tente novamente mais tarde.',
+            error: process.env.NODE_ENV === 'development' ? error.message : undefined
         });
     }
 }
 
 // Função para obter todas as perguntas e suas alternativas
 export async function getPerguntas(req, res) {
-    console.log("Recebida requisição para /perguntas"); // Loga a requisição recebida
     try {
         // Verifica se é o questionário inicial (usando o parâmetro da query)
         const isQuestionarioInicial = req.query.questionario_inicial === 'true';
@@ -69,30 +83,58 @@ export async function getPerguntas(req, res) {
             ORDER BY p.id
         `, [isQuestionarioInicial]);
         
-        console.log("Perguntas encontradas:", perguntas.rows.length); // Loga a quantidade de perguntas encontradas
+        if (perguntas.rows.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'Nenhuma pergunta encontrada para este tipo de questionário.'
+            });
+        }
         
         // Retorna as perguntas e suas alternativas
-        res.status(200).json({
+        return res.status(200).json({
             success: true,
-            perguntas: perguntas.rows
+            perguntas: perguntas.rows,
+            message: 'Perguntas carregadas com sucesso.'
         });
     } catch (error) {
-        // Loga o erro no console e retorna uma resposta de erro
-        console.error('Erro detalhado:', error);
-        res.status(500).json({ 
+        console.error('Erro ao buscar perguntas:', error);
+        return res.status(500).json({ 
             success: false, 
-            message: 'Erro no servidor',
-            error: error.message 
+            message: 'Não foi possível carregar as perguntas neste momento. Por favor, tente novamente mais tarde.',
+            error: process.env.NODE_ENV === 'development' ? error.message : undefined
         });
     }
 }
 
 // Função para salvar as respostas de um usuário
 export async function salvarRespostas(req, res) {
-    // Extrai o ID do usuário e as respostas do corpo da requisição
     const { usuario_id, respostas } = req.body;
 
+    if (!usuario_id || !respostas || !Array.isArray(respostas) || respostas.length === 0) {
+        return res.status(400).json({
+            success: false,
+            message: 'Dados inválidos. Por favor, forneça um ID de usuário válido e pelo menos uma resposta.'
+        });
+    }
+
     try {
+        // Verifica se o usuário existe
+        const usuarioExiste = await banco.query('SELECT id, questionario_inicial FROM usuarios WHERE id = $1', [usuario_id]);
+        if (usuarioExiste.rows.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'Usuário não encontrado. Verifique se o ID está correto.'
+            });
+        }
+
+        // Verifica se o usuário já respondeu o questionário inicial
+        if (usuarioExiste.rows[0].questionario_inicial) {
+            return res.status(400).json({
+                success: false,
+                message: 'Você já respondeu o questionário inicial. Não é possível enviar novas respostas.'
+            });
+        }
+
         // Cria um novo questionário para o usuário no banco de dados
         const questionario = await banco.query(
             'INSERT INTO questionarios (usuario_id, tipo) VALUES ($1, $2) RETURNING id',
@@ -102,6 +144,10 @@ export async function salvarRespostas(req, res) {
 
         // Insere cada resposta do usuário no banco de dados
         for (const resposta of respostas) {
+            if (!resposta.pergunta_id || !resposta.alternativa_id) {
+                throw new Error('Dados de resposta incompletos');
+            }
+
             await banco.query(
                 `INSERT INTO respostas 
                 (usuario_id, pergunta_id, alternativa_id, questionario_id) 
@@ -117,36 +163,51 @@ export async function salvarRespostas(req, res) {
         );
 
         // Retorna uma resposta de sucesso
-        res.status(200).json({
+        return res.status(200).json({
             success: true,
-            message: 'Questionário respondido com sucesso'
+            message: 'Questionário respondido com sucesso! Obrigado por sua participação.'
         });
 
     } catch (error) {
-        // Loga o erro no console e retorna uma resposta de erro
         console.error('Erro ao salvar respostas:', error);
-        res.status(500).json({ 
+        
+        // Verifica se é um erro de violação de chave estrangeira
+        if (error.code === '23503') {
+            return res.status(400).json({
+                success: false,
+                message: 'Dados inválidos. Verifique se as perguntas e alternativas existem.'
+            });
+        }
+
+        return res.status(500).json({ 
             success: false, 
-            message: 'Erro ao salvar respostas',
-            error: error.message
+            message: 'Não foi possível salvar suas respostas neste momento. Por favor, tente novamente mais tarde.',
+            error: process.env.NODE_ENV === 'development' ? error.message : undefined
         });
     }
 }
 
 // Função para obter o histórico de questionários do usuário (data e pontuação)
 export async function getHistoricoQuestionarios(req, res) {
-    console.log('Requisição recebida para histórico:', req.params);
     const { usuario_id } = req.params;
 
     if (!usuario_id) {
-        console.error('Erro: ID de usuário não fornecido na requisição.');
         return res.status(400).json({ 
             success: false, 
-            message: 'ID de usuário não fornecido.' 
+            message: 'ID do usuário não fornecido. Por favor, forneça um ID válido.' 
         });
     }
 
     try {
+        // Verifica se o usuário existe
+        const usuarioExiste = await banco.query('SELECT id FROM usuarios WHERE id = $1', [usuario_id]);
+        if (usuarioExiste.rows.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'Usuário não encontrado. Verifique se o ID está correto.'
+            });
+        }
+
         const resultado = await banco.query(`
             SELECT 
                 q.id AS questionario_id,
@@ -166,15 +227,25 @@ export async function getHistoricoQuestionarios(req, res) {
                 q.data DESC;
         `, [usuario_id]);
 
-        console.log('Resultado da busca:', resultado.rows);
+        if (resultado.rows.length === 0) {
+            return res.status(200).json({
+                success: true,
+                message: 'Nenhum questionário encontrado para este usuário.',
+                historico: []
+            });
+        }
 
-        res.status(200).json(resultado.rows);
+        return res.status(200).json({
+            success: true,
+            message: 'Histórico de questionários carregado com sucesso.',
+            historico: resultado.rows
+        });
     } catch (error) {
         console.error("Erro ao buscar histórico de questionários:", error);
-        res.status(500).json({ 
+        return res.status(500).json({ 
             success: false, 
-            message: 'Erro ao buscar histórico de questionários',
-            error: error.message
+            message: 'Não foi possível carregar seu histórico de questionários neste momento. Por favor, tente novamente mais tarde.',
+            error: process.env.NODE_ENV === 'development' ? error.message : undefined
         });
     }
 }
