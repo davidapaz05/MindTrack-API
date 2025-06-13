@@ -212,7 +212,7 @@ export async function gerarDicaDiagnostico(req, res) {
         const prompt = `
 Você é Athena, uma assistente psicológica da MindTrack.
 
-Com base no seguinte diagnóstico emocional, gere uma dica prática, acolhedora e personalizada que ajude o usuário a lidar melhor com sua situação. A dica deve ser detalhada e incluir passos práticos quando possível. A dica deve ter no maximo 150 palavras:
+Com base no seguinte diagnóstico emocional, gere uma dica prática, acolhedora e personalizada que ajude o usuário a lidar melhor com sua situação. A dica deve ser detalhada e incluir passos práticos quando possível. A dica deve ter no maximo 75 palavras:
 
 Diagnóstico:
 ${textoDiagnostico}

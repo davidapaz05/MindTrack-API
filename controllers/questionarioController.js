@@ -24,15 +24,25 @@ export async function getPontuacaoUsuario(req, res) {
 
         // Consulta a pontuação total do usuário somando as pontuações das alternativas escolhidas
         const resultado = await banco.query(`
-            SELECT COALESCE(SUM(a.pontuacao), 0) AS pontuacao_total
+            SELECT 
+                COALESCE(SUM(a.pontuacao), 0) AS pontuacao_total,
+                COUNT(DISTINCT r.questionario_id) as total_questionarios
             FROM respostas r
             JOIN alternativas a ON r.alternativa_id = a.id
             WHERE r.usuario_id = $1
         `, [usuario_id]);
 
-        // Obtém a pontuação total do resultado da consulta
+        // Obtém a pontuação total e o número de questionários do resultado da consulta
         const pontuacao = resultado.rows[0].pontuacao_total;
-        const nota_convertida = Math.round((pontuacao / 40) * 10 * 100) / 100;
+        const totalQuestionarios = resultado.rows[0].total_questionarios;
+        const pontuacaoMaxima = totalQuestionarios * 40; // Máximo possível baseado no número de questionários
+        const nota_convertida = Math.min(Math.round((pontuacao / pontuacaoMaxima) * 10 * 100) / 100, 10);
+        
+        console.log('Pontuação bruta:', pontuacao);
+        console.log('Total de questionários:', totalQuestionarios);
+        console.log('Pontuação máxima possível:', pontuacaoMaxima);
+        console.log('Nota convertida:', nota_convertida);
+        
         let nivel;
 
         // Define o nível do usuário com base na nota convertida
