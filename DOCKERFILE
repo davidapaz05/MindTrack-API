@@ -31,6 +31,7 @@ COPY --from=builder /app/config ./config
 COPY --from=builder /app/controllers ./controllers
 COPY --from=builder /app/middlewares ./middlewares
 COPY --from=builder /app/routes ./routes
+COPY --from=builder /app/templates ./templates
 
 # Expor a porta que a aplicação usa
 EXPOSE 3000

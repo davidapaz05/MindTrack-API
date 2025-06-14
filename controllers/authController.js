@@ -6,6 +6,7 @@ import jwt from 'jsonwebtoken';
 import banco from '../config/database.js';
 import transporter from '../config/emailConfig.js';
 import dotenv from 'dotenv';
+import { emailTemplates } from '../templates/emailTemplates.js';
 dotenv.config();
 // Chave secreta usada para assinar os tokens JWT
 const SECRET_KEY = process.env.JWT_KEY;
@@ -50,10 +51,11 @@ export async function register(req, res) {
 
         try {
             await transporter.sendMail({
-                from: `"MindTrack" <${process.env.EMAIL_USER}>`,
+                from: `"MindTracking" <${process.env.EMAIL_USER}>`,
                 to: email,
-                subject: 'Código de Verificação - MindTrack',
-                text: `Seu código de verificação é: ${codigoVerificacao} use-o para verificar seu e-mail. Se você não solicitou este código, ignore este e-mail. Atenciosamente, Equipe MindTrack.`,
+                subject: 'Código de Verificação - MindTracking',
+                html: emailTemplates.verificationCode(codigoVerificacao),
+                text: `Seu código de verificação é: ${codigoVerificacao} use-o para verificar seu e-mail. Se você não solicitou este código, ignore este e-mail. Atenciosamente, Equipe MindTracking.`
             });
         } catch (emailError) {
             console.error('Erro ao enviar e-mail:', emailError);
@@ -248,10 +250,11 @@ export async function enviarCodigoRecuperacao(req, res) {
             await banco.query('UPDATE usuarios SET codigo_recuperacao = $1, tentativas_recuperacao = 0 WHERE email = $2', [codigo, email]);
             
             await transporter.sendMail({
-                from: `"MindTrack" <${process.env.EMAIL_USER}>`,
+                from: `"MindTracking" <${process.env.EMAIL_USER}>`,
                 to: email,
-                subject: 'Código de Recuperação de Senha - MindTrack',
-                text: `Seu código de recuperação é: ${codigo}. Use este código para redefinir sua senha. Se você não solicitou esta recuperação, ignore este e-mail.`,
+                subject: 'Código de Recuperação de Senha - MindTracking',
+                html: emailTemplates.passwordRecovery(codigo),
+                text: `Seu código de recuperação é: ${codigo}. Use este código para redefinir sua senha. Se você não solicitou esta recuperação, ignore este e-mail.`
             });
 
             return res.status(200).json({ 
