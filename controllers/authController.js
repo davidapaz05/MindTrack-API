@@ -185,15 +185,37 @@ export async function login(req, res) {
         }
 
         const user = rows[0];
-        
+                
         if (!user.email_verificado) {
-            return res.status(400).json({
-                success: false,
-                message: 'Por favor, verifique seu e-mail antes de fazer login. Um código de verificação foi enviado para seu e-mail.'
-            });
+            const novoCodigo = gerarCodigoVerificacao();
+            
+            try {
+                await banco.query('UPDATE usuarios SET codigo_verificacao = $1 WHERE email = $2', [novoCodigo, email]);
+                
+                await transporter.sendMail({
+                    from: `"MindTracking" <${process.env.EMAIL_USER}>`,
+                    to: email,
+                    subject: 'Novo Código de Verificação - MindTracking',
+                    html: emailTemplates.verificationCode(novoCodigo),
+                    text: `Seu novo código de verificação é: ${novoCodigo} use-o para verificar seu e-mail. Se você não solicitou este código, ignore este e-mail. Atenciosamente, Equipe MindTracking.`
+                });
+            
+                return res.status(200).json({
+                    success: false,
+                    needsVerification: true,
+                    email: email,
+                    message: 'Por favor, verifique seu e-mail antes de fazer login. Um novo código de verificação foi enviado para seu e-mail.'
+                });
+            } catch (emailError) {
+                console.error('Erro ao enviar e-mail:', emailError);
+                return res.status(500).json({
+                    success: false,
+                    message: 'Não foi possível enviar o novo código de verificação. Por favor, tente novamente mais tarde.'
+                });
+            }
         }
-
-        const senhaCorreta = await bcrypt.compare(senha, user.senha);
+        
+        const senhaCorreta = await bcrypt.compare(senha, user.senha); 
         if (!senhaCorreta) {
             return res.status(400).json({ 
                 success: false, 
