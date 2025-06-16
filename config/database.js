@@ -13,7 +13,7 @@ const { Pool } = pkg;
 const banco = new Pool({
     user: process.env.DB_USER, // Usuário do banco de dados (definido no .env)
     host: process.env.DB_HOST, // Host do banco de dados (definido no .env)
-    database: process.env.DATABASE, // Nome do banco de dados (definido no .env)
+    database: process.env.DB_NAME, // Nome do banco de dados (definido no .env)
     password: process.env.DB_PASSWORD, // Senha do banco de dados (definido no .env)
     port: process.env.PORTA // Porta do banco de dados (definido no .env)
 });

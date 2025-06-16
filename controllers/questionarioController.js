@@ -259,3 +259,62 @@ export async function getHistoricoQuestionarios(req, res) {
         });
     }
 }
+
+// Função para obter estatísticas do usuário (número de questionários e idade)
+export async function getEstatisticasUsuario(req, res) {
+    const { usuario_id } = req.params;
+
+    if (!usuario_id) {
+        return res.status(400).json({
+            success: false,
+            message: 'ID do usuário não fornecido. Por favor, forneça um ID válido.'
+        });
+    }
+
+    try {
+        // Verifica se o usuário existe e obtém sua data de nascimento
+        const usuarioExiste = await banco.query('SELECT id, data_nascimento FROM usuarios WHERE id = $1', [usuario_id]);
+        if (usuarioExiste.rows.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'Usuário não encontrado. Verifique se o ID está correto.'
+            });
+        }
+
+        // Obtém o número total de questionários respondidos
+        const questionarios = await banco.query(`
+            SELECT COUNT(*) as total_questionarios
+            FROM questionarios
+            WHERE usuario_id = $1
+        `, [usuario_id]);
+
+        // Calcula a idade do usuário
+        const dataNascimento = new Date(usuarioExiste.rows[0].data_nascimento);
+        const hoje = new Date();
+        let idade = hoje.getFullYear() - dataNascimento.getFullYear();
+        const mesAtual = hoje.getMonth();
+        const mesNascimento = dataNascimento.getMonth();
+        
+        // Ajusta a idade se ainda não fez aniversário este ano
+        if (mesAtual < mesNascimento || (mesAtual === mesNascimento && hoje.getDate() < dataNascimento.getDate())) {
+            idade--;
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: 'Estatísticas do usuário obtidas com sucesso.',
+            estatisticas: {
+                total_questionarios: parseInt(questionarios.rows[0].total_questionarios),
+                idade: idade
+            }
+        });
+
+    } catch (error) {
+        console.error('Erro ao obter estatísticas do usuário:', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Ocorreu um erro ao obter as estatísticas do usuário. Por favor, tente novamente mais tarde.',
+            error: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
+    }
+}
