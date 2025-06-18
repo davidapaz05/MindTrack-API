@@ -1,7 +1,7 @@
 // Importa a configuração do banco de dados
 import banco from '../config/database.js';
 
-// Função para obter a pontuação total de um usuário com base em suas respostas
+// Função para obter a pontuação total de um usuário com base em suas respostas //ok
 export async function getPontuacaoUsuario(req, res) {
     const { usuario_id } = req.params;
 
@@ -72,7 +72,7 @@ export async function getPontuacaoUsuario(req, res) {
     }
 }
 
-// Função para obter todas as perguntas e suas alternativas
+// Função para obter todas as perguntas e suas alternativas//ok
 export async function getPerguntas(req, res) {
     try {
         // Verifica se é o questionário inicial (usando o parâmetro da query)
@@ -116,7 +116,7 @@ export async function getPerguntas(req, res) {
     }
 }
 
-// Função para salvar as respostas de um usuário
+// Função para salvar as respostas de um usuário//ok
 export async function salvarRespostas(req, res) {
     const { usuario_id, respostas } = req.body;
 

@@ -1,6 +1,6 @@
 import banco from '../config/database.js';
 
-// Verifica se o usuário já respondeu o questionário hoje
+// Verifica se o usuário já respondeu o questionário hoje//ok
 export async function verificarQuestionarioDiario(req, res) {
     const { usuario_id } = req.params;
 

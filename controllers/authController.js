@@ -392,3 +392,24 @@ export async function redefinirSenha(req, res) {
         });
     }
 }
+
+export async function deleteAccount(req, res) {
+    const userId = req.user?.id;
+    if (!userId) {
+        return res.status(401).json({ success: false, message: 'Usuário não autenticado.' });
+    }
+    try {
+        // Exclui os diagnósticos do usuário
+        await banco.query('DELETE FROM diagnosticos WHERE usuario_id = $1', [userId]);
+        // Exclui as respostas do usuário
+        await banco.query('DELETE FROM respostas WHERE usuario_id = $1', [userId]);
+        // Exclui os questionários do usuário
+        await banco.query('DELETE FROM questionarios WHERE usuario_id = $1', [userId]);
+        // Exclui o usuário
+        await banco.query('DELETE FROM usuarios WHERE id = $1', [userId]);
+        return res.status(200).json({ success: true, message: 'Conta e todos os dados relacionados excluídos com sucesso.' });
+    } catch (error) {
+        console.error('Erro ao excluir conta:', error);
+        return res.status(500).json({ success: false, message: 'Erro ao excluir conta. Tente novamente mais tarde.' });
+    }
+}
