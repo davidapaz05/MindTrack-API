@@ -1,0 +1,59 @@
+name: Build and Deploy MindTrack API
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v3
+
+      - name: Login to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Build Docker image
+        run: docker build -t mindtrack/mindtracking-api:latest .
+
+      - name: Push image to Docker Hub
+        run: docker push mindtrack/mindtracking-api:latest
+
+  deploy:
+    needs: build
+    runs-on: [self-hosted, aws-ec2]
+    steps:
+      - name: Create Docker network (if not exists)
+        run: |
+          if ! docker network inspect mindtrack-net &> /dev/null; then
+            docker network create mindtrack-net;
+          fi
+
+      - name: Stop and remove old container (if running)
+        run: |
+          docker stop mindtracking-api || true
+          docker rm mindtracking-api || true
+
+      - name: Pull latest image from Docker Hub
+        run: docker pull mindtrack/mindtracking-api:latest
+
+      - name: Run new container
+        run: |
+          docker run -d \
+            --name mindtracking-api \
+            --network mindtrack-net \
+            -p 3000:3000 \
+            --env DATABASE_URL=postgresql://postgres:ImJlvzhJTIiSyoajDGKETksRwoPrzzLl@turntable.proxy.rlwy.net:29772/railway \
+            --env DB_USER=postgres \
+            --env DB_PASSWORD=ImJlvzhJTIiSyoajDGKETksRwoPrzzLl \
+            --env DB_HOST=turntable.proxy.rlwy.net \
+            --env PORTA=29772 \
+            --env DB_NAME=railway \
+            --env JWT_KEY=ae8f29c7d6e4a7b12b3e8cfe147da9f06c49b3d7a5a8e1d48a8e6f0b4d1c9e3a \
+            --env EMAIL_USER=suporte.mindtrack@gmail.com \
+            --env EMAIL_PASS="lcpg goko bsqh vaws" \
+            --env API_KEY=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 \
+            mindtrack/mindtracking-api:latest
