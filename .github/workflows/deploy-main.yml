@@ -43,7 +43,6 @@ jobs:
       - name: Run new container
         run: |
           docker run -d \
-            --restart always \
             --name mindtracking-api \
             --network mindtrack-net \
             -p 3000:3000 \
