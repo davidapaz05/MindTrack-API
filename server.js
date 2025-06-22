@@ -14,26 +14,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
 
 app.use(express.json());
-
-const allowedOrigins = [
-    'https://mind-tracking.vercel.app', 
-];
-
-const corsOptions = {
-    origin: function (origin, callback) {
-        // Permite requisições sem origin (ex: mobile, curl)
-        if (!origin) return callback(null, true);
-        if (allowedOrigins.indexOf(origin) !== -1) {
-            callback(null, true);
-        } else {
-            callback(new Error('Not allowed by CORS'));
-        }
-    },
-    credentials: true,
-};
-
-app.use(cors(corsOptions));
-
+app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 
 app.use(express.static(path.join(__dirname, 'public')));
