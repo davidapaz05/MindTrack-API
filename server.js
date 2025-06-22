@@ -13,13 +13,25 @@ dotenv.config();
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
 
+// CORS seguro
+const allowedOrigins = [
+  'https://mind-tracking.vercel.app',
+  // outros domínios permitidos
+];
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) === -1) {
+      return callback(new Error('CORS não permitido'), false);
+    }
+    return callback(null, true);
+  }
+}));
+
 app.use(express.json());
-app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 
 app.use(express.static(path.join(__dirname, 'public')));
-
-app.use(express.static("public"));
 
 app.use('/api', chatRoutes);
 app.use('/auth', authRoutes);
