@@ -16,7 +16,7 @@ const app = express();
 // CORS seguro
 const allowedOrigins = [
   'https://mind-tracking.vercel.app',
-  // outros domínios permitidos
+   'http://localhost:5173'
 ];
 app.use(cors({
   origin: function (origin, callback) {
