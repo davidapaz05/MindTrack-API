@@ -56,5 +56,5 @@ jobs:
             --env JWT_KEY=ae8f29c7d6e4a7b12b3e8cfe147da9f06c49b3d7a5a8e1d48a8e6f0b4d1c9e3a \
             --env EMAIL_USER=suporte.mindtrack@gmail.com \
             --env EMAIL_PASS="lcpg goko bsqh vaws" \
-            --env API_KEY=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 \
+            --env API_KEY=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 \
             mindtrack/mindtracking-api:latest
